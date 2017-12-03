@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<!-- This is my Custom Map project.  The user can 1) select from a list of
+Categoryies and 2) input a City and State in the Search Box on the Map.  This
+will come back with a filterable list of up to the top 20 corresponding places
+along with a corresponding animated marker representing each place on the map.
+This is a responsive web site that utilizes knockout and the mvmmv. Third party
+info is pullied via an AJAX query from foursquare such as two pictures and the
+formatted address.  -->
+
+<!--head info-->
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Map Project</title>
+    <link href="https://fonts.googleapis.com/css?family=Lato:100,300" rel="stylesheet">
+    <link rel="stylesheet" href="css/bootstrap.css">
+    <link type="text/css" rel="stylesheet" href="css/map.css">
+  </head>
+
+<!-- The Main Body of the web page. -->
+  <body>
+    <div class="container">
+      <div class="row">
+
+      <!-- User Interface Area and Search Results -->
+      <section>
+        <div class="options-box col-xs-3">
+          <h1>Find Points of Interest</h1>
+          <p>Select a Category from the List below and enter a City and State in
+             the Search Box on the Map.</p>
+          <input id="pac-input" class="controls" type="text" placeholder="Enter City and State! Example: Nashville, TN">
+          <hr>
+
+          <!-- Category box contains a list of 4 options for the user to select. -->
+          <div class="category-box">
+            <h1>Select A Category</h1>
+            <div class="" id="categorySelections" data-bind="foreach: categories">
+              <div>
+                <input type="radio" name="category" data-bind="attr: { value: $data.category_value() }, checked: $parent.selected" >
+                <span data-bind="text: $data.category_name()"></span>
+              </div>
+            </div>
+          </div>
+          <hr>
+
+          <!--Filtered Items-->
+          <!-- Filtered Items Filter Box -->
+          <div class="filter-box-area">
+            <div class="filter-area">
+              <p>Filter: <input data-bind="value: filter, valueUpdate: 'afterkeydown'" /></p>
+            </div>
+            <div class="filter-area">
+              <button data-bind="click: clearFilter">Clear Search</button>
+            </div>
+          </div>
+
+          <!-- Filtered Items Results -->
+          <div class="filted-list" id="filtedlist"  data-bind="foreach: filteredLocations">
+            <span data-bind="text: location_name(), click: $parent.displayInfo"></span>
+            <br>
+          </div> <!--End Filtered Items-->
+
+        </div> <!-- options box -->
+      </section>
+
+      <!-- Map Area -->
+      <div class="col-xs-9">
+        <div id="map"></div>
+      </div>
+      <br>
+      </div>  <!-- row -->
+
+    </div>  <!-- container -->
+
+    <!-- js script files for the map for knockout and the js for the map app.  -->
+    <script src="js/jquery-3.2.0.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/lib/knockout-3.2.0.js"></script>
+    <script src="js/map.js"></script>
+    <script async defer
+      src=
+      "https://maps.googleapis.com/maps/api/js?libraries=places&v=3&callback=initMap&key=AIzaSyDGcZNtP8LEq_ilLmwpC_0NdXkkPy7ai3E" onerror="googlerror()">
+    </script>
+  </body>
+</html>
