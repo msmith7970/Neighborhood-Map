@@ -165,11 +165,11 @@ function initMap() {
           // the data you want to keep and resue.
           locations_list.forEach(function(location) {
             self.locations.push( new Locations(location) );
-          });  // end of Model.categoriesList
+          });  // End of Model.categoriesList
 
         map.fitBounds(bounds);
         model.map_bounds = bounds;
-      } // end callback function
+      } // End callback function
 
       // Open InfoWindow.  Pass in the location name lat & lng
       self.getInfoWindowContent = function(location, name, lat, lng) {
@@ -180,25 +180,25 @@ function initMap() {
           };
         infoWindow.setPosition(pos);
 
-        // Use the Foresquare API to retreive the Fromatted addreess and two
+        // Use the Foursquare API to retreive the Fromatted addreess and two
         // pictures.  Two AJAX requests will be necessary.  The first one to
-        // get the Foresquare ID of the location (where the location was
+        // get the Foursquare ID of the location (where the location was
         // obatained from Google places).  The second AJAX reqest will take
-        // that Foresquare ID and retreive two pictures from the list of
+        // that Foursquare ID and retreive two pictures from the list of
         // pictures that are availble.
         var client_id = 'YWDXDQNTJCBA5VGTOVEAAS5ZXF1HMCA0MPBJGIUZZ4AGM05O';
         var client_secret = 'Z03QBTYLREFDF2WBK3KPGCVBCPKWVDR4XF2SCDYGDLCJ5QIW';
 
-        // Foresquare required parameter for date of related info.
+        // Foursquare required parameter for date of related info.
         var version = '20171001';
-        var ll = lat + ',' + lng;  // Foresquare lat & long
-        var query = name;  // Foresquare Query String
+        var ll = lat + ',' + lng;  // Foursquare lat & long
+        var query = name;  // Foursquare Query String
 
-        // Foresquare intent parameter, finds near exact match
+        // Foursquare intent parameter, finds near exact match
         var intent = 'match';
-        var limit = 1;   // Foresquare number to limit results to.
+        var limit = 1;   // Foursquare number to limit results to.
 
-        // Foresquare Venue url for the API request.
+        // Foursquare Venue url for the API request.
         var venue_url = 'https://api.foursquare.com/v2/venues/search';
         var photoSize = '300';
         var venuID = '';
@@ -211,7 +211,7 @@ function initMap() {
         console.log('query= ' + query);
         console.log('intent= ' + intent);
         // begin first AJAX JQuery to obtain the formatted address and the
-        // Foresquare ID of the place.
+        // Foursquare ID of the place.
         $.ajax({
           type: 'GET',
           dataType: 'jsonp',
@@ -243,7 +243,7 @@ function initMap() {
                 data.response.venues[0].location.formattedAddress[0] + ', ' +
                 data.response.venues[0].location.formattedAddress[1] +
                 '</p></div>';
-              //  Perform a second AJAX to get photos.
+              // Perform a second AJAX to get photos.
               $.ajax({
                 type: 'GET',
                 dataType: 'jsonp',
