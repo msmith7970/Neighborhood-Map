@@ -9,8 +9,7 @@ var model = {
     locations: [
     ],
     current_content: '',
-    map_bounds: '',
-    saved_category: "points of interest"
+    map_bounds: ''
   };
 
 
@@ -34,13 +33,14 @@ function initMap() {
     var map;
     var usCenter = {lat: 39.8283, lng: -98.5795};
     var self = this;
-    self.markers = [];
     var categories_list = model.categoriesList;
     var locations_list = model.locations;
+    var initial_load = true;
+    self.markers = [];
 
     // Initialize the categories List.
     self.categories = ko.observableArray([]);
-    self.selected = ko.observable(model.categoriesList[0].value);
+    self.selected = ko.observable(categories_list[0].value);
     categories_list.forEach(function(category) {
       self.categories.push(new Categories(category));
     }); // End of Model.categories List.
@@ -51,7 +51,6 @@ function initMap() {
       self.locations.push(new Locations(location));
     });
 
-    var new_category = self.selected();
     // Create a new Google Map centered in the US.
     map = new google.maps.Map(document.getElementById('map'), {
       center: usCenter,
@@ -91,22 +90,28 @@ function initMap() {
       var input = document.getElementById('pac-input');
       var searchBox = new google.maps.places.SearchBox(input);
       map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
-      searchBox.addListener('places_changed', function() {
+      google.maps.event.addListener(searchBox, 'places_changed', function() {
+      // searchBox.addListener('places_changed', function() {
         // Clear all markers with the start of a new search.
         self.hideMarkers(self.markers);
-        new_category = self.selected();
-
-        // Update the model with the new selected category.
-        model.saved_category = new_category;
-        newSearch = input.value + ' ' + new_category;
-        self.peformSearch(newSearch);
+        var new_category = self.selected();
+        var newSearch = input.value + ' ' + new_category;
+        self.performSearch(newSearch);
       });  // End Search box listener for places changed.
 
-      // Create an InfoWidnow.
-      infoWindow = new google.maps.InfoWindow();
+      // Initialize variable for InfoWidnow.
+      var infoWindow = new google.maps.InfoWindow();
 
-      // Initialize servcie as the Places Services Object.
-      service = new google.maps.places.PlacesService(map);
+      // Initialize servcie as the Places Services Object.  This is what
+      // we will use to find up to 20 places with each search.
+      var service = new google.maps.places.PlacesService(map);
+
+      // When the web app is first loaded, by default, searches
+      // Points of Interest in Nashville TN.
+      var initial_request = {
+        query: 'Nashville, TN Points Of Ifnterest'
+      };
+      service.textSearch(initial_request, callback);
 
       // Style the markers a bit. This will be our defalut marker icon.  Color
       // is Blue.
@@ -126,13 +131,9 @@ function initMap() {
       });
 
       // Performs a new search using the query entered by the user from the
-      // input box from the map.
-      // function peformSearch(newSearch) {
-      self.peformSearch = function(newSearch) {
-        var usCenter = new google.maps.LatLng(39.8283, 98.5795);
+      // search input box from the map.
+      self.performSearch = function(newSearch) {
         var request = {
-          location: usCenter,
-          radius: '500',
           query: newSearch
         };
           service.textSearch(request, callback);
@@ -141,35 +142,39 @@ function initMap() {
       // Callback function to process the results of the places search.
       function callback(results, status) {
         if (status !== google.maps.places.PlacesServiceStatus.OK) {
-          return;
-        }
+          alert('Google Search for Places failed.  Please ensure you ' +
+            'are connected to the internet or try entering a new ' +
+            'search.');
 
-        // locations_list used to load the locatons results into the model.
-        locations_list = [];
+        } else {
 
-        // Empty out the observable array with the removeALL.
-        self.locations.removeAll();
+          // locations_list used to load the locatons results into the model.
+          locations_list = [];
 
-        // Initialize the bounds to contain the bounds of all the locations.
-        var bounds = new google.maps.LatLngBounds();
+          // Empty out the observable array with the removeALL.
+          self.locations.removeAll();
 
-        // Add each location to locations_list, create a marker for it and
-        // extend the bounds.
-        for (var i = 0; result = results[i]; i++) {
-          locations_list.push(result);
-          self.addMarker(result);
-          bounds.extend(result.geometry.location);
-         }
+          // Initialize the bounds to contain the bounds of all the locations.
+          var bounds = new google.maps.LatLngBounds();
 
-          // Loop thru the list and create an Object for each one containing
-          // the data you want to keep and resue.
-          locations_list.forEach(function(location) {
-            self.locations.push( new Locations(location) );
-          });  // End of Model.categoriesList
+          // Add each location to locations_list, create a marker for it and
+          // extend the bounds.
+          for (var i = 0; result = results[i]; i++) {
+            locations_list.push(result);
+            self.addMarker(result);
+            bounds.extend(result.geometry.location);
+           }
 
-        map.fitBounds(bounds);
-        model.map_bounds = bounds;
-      } // End callback function
+            // Loop thru the list and create an Object for each one containing
+            // the data you want to keep and resue.
+            locations_list.forEach(function(location) {
+              self.locations.push( new Locations(location) );
+            });  // End of Model.categoriesList
+
+          map.fitBounds(bounds);
+          model.map_bounds = bounds;
+        } // End if else.
+      } // End callback function.
 
       // Open InfoWindow.  Pass in the location name lat & lng
       self.getInfoWindowContent = function(location, name, lat, lng) {
@@ -206,10 +211,10 @@ function initMap() {
         var photo = [];
         var i = 0;
         var photo_count;
-        console.log('v= ' + version);
-        console.log('ll= ' + ll);
-        console.log('query= ' + query);
-        console.log('intent= ' + intent);
+        // console.log('v= ' + version);
+        // console.log('ll= ' + ll);
+        // console.log('query= ' + query);
+        // console.log('intent= ' + intent);
         // begin first AJAX JQuery to obtain the formatted address and the
         // Foursquare ID of the place.
         $.ajax({
@@ -230,12 +235,12 @@ function initMap() {
 
               // Error check if no venue is found.
               if (!data.response.venues[0]) {
-                console.log('venues = 0 - no data');
+                // console.log('venues = 0 - no data');
                 alert('No Foursqure data available, please select another ' +
                       'location');
               }
               var venuID = data.response.venues[0].id;
-              console.log('id = ' + data.response.venues[0].id);
+              // console.log('id = ' + data.response.venues[0].id);
               location.venuID = venuID;
               content = content + '<div id="infoWindowText"><h1>' +
                 data.response.venues[0].name + '</h1>' +
@@ -383,7 +388,7 @@ function initMap() {
     });
 
     self.displayInfo = function(location) {
-      console.log(location.location_name());
+      // console.log(location.location_name());
       self.hideMarkers(self.markers);
       model.current_content = '';
       self.filter(location.location_name());
@@ -430,7 +435,7 @@ ko.applyBindings(new ViewModel());
 
 // Error handling function when Google Maps fails to load.
 function googlerror() {
-  console.log('google load error');
+  // console.log('google load error');
   alert('Google Maps failed to load correctly.  Please check your' +
     'Internet Connection and try loading the page again');
 }

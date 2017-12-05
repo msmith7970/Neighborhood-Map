@@ -2,7 +2,7 @@
 
 The purpose of the project is to create a Web Application for a Neighborhood Map that utilizes the Google Maps API.  This application's design also uses Knockout to create a MVVM pattern.
 
-By default when this webpage is first visited will display a map of the United States. A search will need to be performed to pull in a list of places.
+By default when this webpage is first visited will display a map of the United States, which is immediately populated with a search consisting of the top 20 Points of Interest in Nashville, TN. After this initial load of places the user will have the option of performing additional searches.
 
 The user has two key parameters to input to perform this search:
 1. Select a Category.
