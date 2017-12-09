@@ -51,6 +51,10 @@ function initMap() {
       self.locations.push(new Locations(location));
     });
 
+    // Bind the User Input to the search Box (with an id=pac-input) on
+    // the Google Map.
+    self.pac_input = ko.observable('');
+
     // Create a new Google Map centered in the US.
     map = new google.maps.Map(document.getElementById('map'), {
       center: usCenter,
@@ -145,9 +149,7 @@ function initMap() {
           alert('Google Search for Places failed.  Please ensure you ' +
             'are connected to the internet or try entering a new ' +
             'search.');
-
         } else {
-
           // locations_list used to load the locatons results into the model.
           locations_list = [];
 
@@ -178,7 +180,6 @@ function initMap() {
 
       // Open InfoWindow.  Pass in the location name lat & lng
       self.getInfoWindowContent = function(location, name, lat, lng) {
-
         var pos = {
           lat: lat,
           lng: lng
@@ -211,15 +212,11 @@ function initMap() {
         var photo = [];
         var i = 0;
         var photo_count;
-        // console.log('v= ' + version);
-        // console.log('ll= ' + ll);
-        // console.log('query= ' + query);
-        // console.log('intent= ' + intent);
         // begin first AJAX JQuery to obtain the formatted address and the
         // Foursquare ID of the place.
         $.ajax({
           type: 'GET',
-          dataType: 'jsonp',
+          dataType: 'json',
           cache: false,
           url: venue_url + '?' +
                'v=' + version +
@@ -229,18 +226,16 @@ function initMap() {
                '&limit=' + limit +
                '&client_id=' + client_id +
                '&client_secret=' + client_secret,
-          async: true,
-          success: function(data) {
-            if (data.meta.code == 200) {
+          async: true
+        }).done(function(data, textStatus, jqXHR) {
+          if (data.meta.code == 200) {
 
-              // Error check if no venue is found.
-              if (!data.response.venues[0]) {
-                // console.log('venues = 0 - no data');
-                alert('No Foursqure data available, please select another ' +
-                      'location');
-              }
+            // Error check if no venue is found.
+            if (!data.response.venues[0]) {
+              alert('No Foursqure data available, please select another ' +
+                    'location');
+            }
               var venuID = data.response.venues[0].id;
-              // console.log('id = ' + data.response.venues[0].id);
               location.venuID = venuID;
               content = content + '<div id="infoWindowText"><h1>' +
                 data.response.venues[0].name + '</h1>' +
@@ -248,10 +243,11 @@ function initMap() {
                 data.response.venues[0].location.formattedAddress[0] + ', ' +
                 data.response.venues[0].location.formattedAddress[1] +
                 '</p></div>';
+
               // Perform a second AJAX to get photos.
               $.ajax({
                 type: 'GET',
-                dataType: 'jsonp',
+                dataType: 'json',
                 cache: false,
                 url: 'https://api.foursquare.com/v2/venues' + '/' + venuID +
                   '/photos' +
@@ -259,49 +255,53 @@ function initMap() {
                   'v=' + version +
                   '&client_id=' + client_id +
                   '&client_secret=' + client_secret,
-                async: true,
-                success: function(data) {
-                  if (data.meta.code === 200) {
-                    // Handle error if no pictures are available by checking if
-                    // the photos count from foursquare is zero.
-                    if (data.response.photos.count == 0) {
-                      content = content;
-                      alert('Sorry Picture images are not available from' +
-                        'Foursquare. Please select another location.');
-                    } else {
-                      photo_count = data.response.photos.count;
+                async: true
+              }).done(function(data) {
+                if (data.meta.code === 200) {
+                  // Handle error if no pictures are available by checking if
+                  // the photos count from foursquare is zero.
+                  if (data.response.photos.count === 0) {
+                    content = content;
+                    alert('Sorry Picture images are not available from' +
+                      'Foursquare. Please select another location.');
+                  } else {
+                    photo_count = data.response.photos.count;
 
-                      // Error check to see if only one photo is available then
-                      // set the photo counter to 1 otherwise get the first 2
-                      // photos.
-                      if (photo_count == 1) {
-                        photo_count = 1;
-                      } else {
-                        photo_count = 2;
-                      }
-                      content = content + '<div class="center">';
-                      while (i < photo_count) {
-                        photo[i] = data.response.photos.items[i].prefix +
-                          'cap' + photoSize +
-                          data.response.photos.items[i].suffix;
-                        content = content + '<img class="img-contain" src="' +
-                          photo[i] + '"/>';
-                        i++;
-                      }
-                      content = content + '</div>';
-                      content = content + '<br><br><p>Address and Photos' +
-                        ' provided by <a href="http://www.Foursquare.com"' +
-                        ' target="_blank">Foursquare.com</a>';
-                      model.current_content=content;
-                      infoWindow.setContent(content);
-                      infoWindow.open(map, location.marker);
-                    } // End Else
-                  } // End If
-                } //End success function photo AJAX query
-              });  // End photo AJAX request
-            } // End first if statement;
-          }  // End first AJAX success function.
-        });  // End first AJAX request for venu search.
+                    // Error check to see if only one photo is available then
+                    // set the photo counter to 1 otherwise get the first 2
+                    // photos.
+                    if (photo_count == 1) {
+                      photo_count = 1;
+                    } else {
+                      photo_count = 2;
+                    }
+                    content = content + '<div class="center">';
+                    while (i < photo_count) {
+                      photo[i] = data.response.photos.items[i].prefix +
+                        'cap' + photoSize +
+                        data.response.photos.items[i].suffix;
+                      content = content + '<img class="img-contain" src="' +
+                        photo[i] + '"/>';
+                      i++;
+                    }
+                    content = content + '</div>';
+                    content = content + '<br><br><p>Address and Photos' +
+                      ' provided by <a href="http://www.Foursquare.com"' +
+                      ' target="_blank">Foursquare.com</a>';
+                    model.current_content=content;
+                    infoWindow.setContent(content);
+                    infoWindow.open(map, location.marker);
+                  } // End Else
+                } // End If
+                // } //End success function photo AJAX query
+              }).fail(function(data) {
+                alert('try again champ no photos');  // End photo AJAX request
+              }); // End first if statement;
+            // }  // End first AJAX success function.
+            } // End if
+        }).fail(function(jqXHR, textStatus, errorThrown) {
+        }); // End .fail
+        // });  // End first AJAX request for venu search.
       };  // End getInfoWindowContent function.
 
     // Create a marker for each location.
@@ -346,7 +346,6 @@ function initMap() {
     // This function will loop through the listings and hide them all.
     self.hideMarkers = function (markers) {
       for (var i = 0; i < markers.length; i++) {
-        // markers[i].setMap(null);
         markers[i].setVisible(false);
       }
     };
@@ -388,7 +387,6 @@ function initMap() {
     });
 
     self.displayInfo = function(location) {
-      // console.log(location.location_name());
       self.hideMarkers(self.markers);
       model.current_content = '';
       self.filter(location.location_name());
@@ -436,6 +434,6 @@ ko.applyBindings(new ViewModel());
 // Error handling function when Google Maps fails to load.
 function googlerror() {
   // console.log('google load error');
-  alert('Google Maps failed to load correctly.  Please check your' +
-    'Internet Connection and try loading the page again');
+  alert('Google Maps failed to load correctly.  Please check your ' +
+    'Internet Connection and try loading the page again.');
 }

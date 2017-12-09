@@ -21,6 +21,7 @@ formatted address.  -->
 
 <!-- The Main Body of the web page. -->
   <body>
+    <br>
     <div class="container">
       <div class="row">
 
@@ -28,9 +29,12 @@ formatted address.  -->
       <section>
         <div class="options-box col-xs-3">
           <h1>Find Points of Interest</h1>
-          <p>Select a Category from the List below and enter a City and State in
-             the Search Box on the Map.</p>
-          <input id="pac-input" class="controls" type="text" placeholder="Enter City and State! Example: Nashville, TN">
+          <p>Select a Category from the List below and enter a City and State
+             in the Search Box on the Map.  The Initial Search will locate
+             Points of Interest for Nashville, TN.</p>
+          <input id="pac-input" type="text"
+            data-bind="textInput: pac_input"
+            placeholder="Enter City and State! Example: Nashville, TN">
           <hr>
 
           <!-- Category box contains a list of 4 options for the user to select. -->
@@ -38,21 +42,32 @@ formatted address.  -->
             <h1>Select A Category</h1>
             <div class="" id="categorySelections" data-bind="foreach: categories">
               <div>
-                <input type="radio" name="category" data-bind="attr: { value: $data.category_value() }, checked: $parent.selected" >
+                <input type="radio" name="category"
+                  data-bind="attr: { value: $data.category_value() },
+                            checked: $parent.selected" >
                 <span data-bind="text: $data.category_name()"></span>
               </div>
             </div>
           </div>
           <hr>
-
           <!--Filtered Items-->
           <!-- Filtered Items Filter Box -->
-          <div class="filter-box-area">
-            <div class="filter-area">
-              <p>Filter: <input data-bind="value: filter, valueUpdate: 'afterkeydown'" /></p>
+          <div class="filter-container">
+            <div class="filter-params">
+              <label>
+                Filter:
+              </label>
             </div>
-            <div class="filter-area">
-              <button data-bind="click: clearFilter">Clear Search</button>
+            <div class="filter-params">
+              <input data-bind="value: filter, valueUpdate: 'afterkeydown'" />
+            </div>
+          </div>
+
+          <div class="filter-container-btn">
+            <div class="row">
+            <div class="filter-params filter-button">
+              <button data-bind="click: clearFilter">Clear Filter Search</button>
+            </div>
             </div>
           </div>
 
@@ -73,6 +88,7 @@ formatted address.  -->
       </div>  <!-- row -->
 
     </div>  <!-- container -->
+    <br>
 
     <!-- js script files for the map for knockout and the js for the map app.  -->
     <script src="js/jquery-3.2.0.js"></script>
