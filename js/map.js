@@ -134,6 +134,12 @@ function initMap() {
         map.fitBounds(bounds);
       });
 
+      // Makes map display responsively to make sure map markers always fit
+      // on the screen as the user resizes their browser window.
+      google.maps.event.addDomListener(window, 'resize', function() {
+        map.fitBounds(bounds); // `bounds` is a `LatLngBounds` object
+      });
+
       // Performs a new search using the query entered by the user from the
       // search input box from the map.
       self.performSearch = function(newSearch) {
@@ -295,11 +301,16 @@ function initMap() {
                 } // End If
                 // } //End success function photo AJAX query
               }).fail(function(data) {
-                alert('try again champ no photos');  // End photo AJAX request
+                alert('Sorry, Picture images from Foursquare failed to load.' +
+                  '  Please select another location and try again.');  // End photo AJAX request
               }); // End first if statement;
             // }  // End first AJAX success function.
             } // End if
         }).fail(function(jqXHR, textStatus, errorThrown) {
+          alert('Sorry unable to retreive Location Data from Foursquare. ' +
+            'Either Data from Foursquare is not available at this time or ' +
+            'you are not connected to the Internet.  Please ensure you are '+
+            'connected to the Internet and try again.');
         }); // End .fail
         // });  // End first AJAX request for venu search.
       };  // End getInfoWindowContent function.
